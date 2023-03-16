@@ -1,0 +1,44 @@
+schema {
+  query: Query
+  mutation: Mutation
+}
+
+type Query {
+  # Get User
+  getUser(id: ID!): AWSJSON
+}
+
+subscription onCreateUser {
+  onCreateUser {
+    id,
+    name,
+    email
+  }
+}
+
+type Mutation {
+  # Creat user
+  createUser(
+    name: String!
+    organisation: String!
+    designation: String
+  ): UserProfile!
+
+  # Update user
+  updateUser(
+    id: ID!
+    name: String
+    organisation: String
+    designation: String
+  ): UserProfile!
+
+  # delete an user
+  deleteUser(id: ID!): AWSJSON
+}
+
+type UserProfile {
+  id: ID!
+  name: String
+  organisation: String
+  designation: String
+}

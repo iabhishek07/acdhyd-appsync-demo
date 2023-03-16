@@ -1,0 +1,49 @@
+service: users-backend
+frameworkVersion: "3"
+useDotenv: true
+configValidationMode: error
+
+provider:
+  name: aws
+  runtime: nodejs14.x
+  stage: dev
+  region: ap-south-1
+
+  # Environment variables
+  environment:
+    STAGE: ${self:provider.stage}
+    REGION: ${self:provider.region}
+    SERVICE_NAME: ${self:service}-${self:provider.stage}
+    DYNAMODB: users-${self:provider.stage}
+
+  # IAM statements
+  iam:
+    role:
+      statements:
+        - Effect: Allow
+          Action:
+            - dynamodb:GetItem
+            - dynamodb:UpdateItem
+            - dynamodb:DeleteItem
+            - dynamodb:PutItem
+          Resource: "arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.DYNAMODB}"
+
+plugins:
+  - serverless-appsync-plugin
+
+custom:
+  appSync: ${file(serverless-appsync-api.yml)}
+
+resources:
+  Resources:
+    UsersTable:
+      Type: "AWS::DynamoDB::Table"
+      Properties:
+        BillingMode: PAY_PER_REQUEST
+        KeySchema:
+          - AttributeName: id
+            KeyType: HASH
+        AttributeDefinitions:
+          - AttributeName: id
+            AttributeType: S
+        TableName: ${self:provider.environment.DYNAMODB}
